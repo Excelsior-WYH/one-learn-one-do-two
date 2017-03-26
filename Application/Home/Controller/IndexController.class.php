@@ -62,7 +62,7 @@ class IndexController extends BaseController {
         $current = I('post.current');
         if (!is_numeric($current) || $current < 1 || $current > $this->total) {
             $this->ajaxReturn(array(
-                'status' => 200,
+                'status' => 403,
                 'error'  => '非法数据'
             ));
         }
