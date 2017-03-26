@@ -17,8 +17,6 @@ class IndexController extends BaseController {
         $users = M('users');
         $user = $users->where(array('openid' => $openid))->find();
 
-        //todo 学习限制
-
         //访问时检查是否为第二天, 重置状态
         if ($user['date'] != date('Y-m-d', time())) {
             $user['date'] = date('Y-m-d', time());
@@ -37,29 +35,50 @@ class IndexController extends BaseController {
         }
 
         $currentLearn = json_decode($user['today_learn_id']);
-        if ($user['current'] < $this->chooseCount) {
-            $data = $this->fillblank($currentLearn, $user['current']);
-        } elseif ($user['current'] >= $this->chooseCount && $user['current'] < $this->total){
-            $data = $this->choose($currentLearn);
-        } else {
-            $this->ajaxReturn(array(
-                'status' => 500,
-                'error' => '当前题目未知'
-            ));
+        for ($i = $user['current']-1; $i < $this->total; $i++) {
+            if ($i < $this->chooseCount) {
+                $data['questions'][] = $this->fillblank($currentLearn, $i);
+            } elseif ($i >= $this->chooseCount && $i < $this->total){
+                $data['questions'][] = $this->choose($currentLearn);
+            } else {
+                $this->ajaxReturn(array(
+                    'status' => 500,
+                    'error' => '当前题目未知'
+                ));
+            }
         }
         $user['today_learn_id'] = json_encode($currentLearn);
-        $user['current'] += 1;
-        $data['current'] = $user['current'];
-        if ($user['current'] == $this->total) {
-            $user['current'] = 0;
-            $user['count'] += 1;
-            $user['today_learn_groups'] += 1;
-        }
+
         $data['total'] = $this->total;
+        $data['current'] = $user['current'];
         $users->where(array('openid' => $openid))->save($user);
         $this->ajaxReturn(array(
             'status' => 200,
             'data'  => $data
+        ));
+    }
+
+    public function record() {
+        $current = I('post.current');
+        if (!is_numeric($current) || $current < 1 || $current > $this->total) {
+            $this->ajaxReturn(array(
+                'status' => 200,
+                'error'  => '非法数据'
+            ));
+        }
+        $openid = session('openid');
+        $users = M('users');
+        $user = $users->where(array('openid' => $openid))->find();
+        if ($current == $this->total) {
+            $user['current'] = 0;
+            $user['count'] += 1;
+            $user['today_learn_groups'] += 1;
+        } else {
+            $user['current'] = $current+1;
+        }
+        $users->where(array('openid' => $openid))->save($user);
+        $this->ajaxReturn(array(
+            'status' => 200,
         ));
     }
 
