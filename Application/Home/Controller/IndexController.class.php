@@ -12,7 +12,7 @@ class IndexController extends BaseController {
 
     }
 
-    public function question() {
+    public function questions() {
         $openid = session('openid');
         $users = M('users');
         $user = $users->where(array('openid' => $openid))->find();
@@ -21,7 +21,7 @@ class IndexController extends BaseController {
         if ($user['date'] != date('Y-m-d', time())) {
             $user['date'] = date('Y-m-d', time());
             $user['time'] = time();
-            $user['current'] = 0;
+            $user['current'] = 1;
             $user['today_learn_groups'] = 0;
             $user['today_learn_id'] = json_encode(array('choose'=>array(), 'fillblank'=>array()));
         }
@@ -50,7 +50,7 @@ class IndexController extends BaseController {
         $user['today_learn_id'] = json_encode($currentLearn);
 
         $data['total'] = $this->total;
-        $data['current'] = $user['current'];
+        $data['current'] = (int)$user['current'];
         $users->where(array('openid' => $openid))->save($user);
         $this->ajaxReturn(array(
             'status' => 200,
@@ -70,7 +70,7 @@ class IndexController extends BaseController {
         $users = M('users');
         $user = $users->where(array('openid' => $openid))->find();
         if ($current == $this->total) {
-            $user['current'] = 0;
+            $user['current'] = 1;
             $user['count'] += 1;
             $user['today_learn_groups'] += 1;
         } else {
