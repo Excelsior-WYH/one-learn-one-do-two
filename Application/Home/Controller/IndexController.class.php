@@ -9,7 +9,7 @@ class IndexController extends BaseController {
     private $appid = 'wx81a4a4b77ec98ff4';
     private $acess_token = 'gh_68f0a1ffc303';
     public function index() {
-
+     echo __APP__.'/Public/images/';
     }
 
     public function questions() {
@@ -166,7 +166,7 @@ class IndexController extends BaseController {
             'answer' => $question['answer']
         );
         if ($question['type'] == 'sigequanmian') {
-            $data['image'] = rand(1, 23).'.png';
+            $data['image'] = __APP__.'/Public/images/'.rand(1, 23).'.png';
         }
         return $data;
     }
